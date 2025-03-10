@@ -8,6 +8,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Shift, allTimes } from '../types';
 import { getShiftsForDate, updateShift, initializeShiftsForDate } from '../services/ReservationService';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { scheduleLocalNotification } from '../services/NotificationService';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -76,6 +77,15 @@ const SettingsScreen: React.FC<Props> = () => {
     hideDatePicker();
   };
 
+  const testNotification = async () => {
+    console.log('Test notifica...');
+    const id = await scheduleLocalNotification(
+      'Test Notifica',
+      'Questa è una notifica di test per verificare il funzionamento'
+    );
+    console.log('Notifica di test inviata con ID:', id);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -104,6 +114,15 @@ const SettingsScreen: React.FC<Props> = () => {
               onPress={() => handleQuickDateSelect(2)}
               style={styles.quickDateButton}
             />
+          </View>
+
+          <View style={{ flexDirection: 'row', marginTop: 10 }}>
+            <TouchableOpacity
+              style={[styles.dateButton, { backgroundColor: '#e91e63' }]}
+              onPress={testNotification}
+            >
+              <Text style={styles.dateButtonText}>Test Notifica</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
