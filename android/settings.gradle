@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'Fermento20'
+rootProject.name = 'Fermento 2.0'
 
 dependencyResolutionManagement {
   versionCatalogs {
