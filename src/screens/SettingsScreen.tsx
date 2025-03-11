@@ -112,7 +112,7 @@ const SettingsScreen: React.FC<Props> = () => {
             style={styles.customDateButton} 
             onPress={showDatePicker}
           >
-            <MaterialCommunityIcons name="calendar" size={18} color="#e91e63" />
+            <MaterialCommunityIcons name="calendar" size={18} color="#2962ff" />
             <Text style={styles.customDateText}>
               {format(new Date(`${selectedDate}T00:00:00`), 'dd/MM/yyyy')}
             </Text>
@@ -135,8 +135,8 @@ const SettingsScreen: React.FC<Props> = () => {
               <Switch
                 value={shift.enabled}
                 onValueChange={() => handleToggleShift(shift.time, shift.enabled)}
-                trackColor={{ false: '#767577', true: '#e91e6360' }}
-                thumbColor={shift.enabled ? '#e91e63' : '#f4f3f4'}
+                trackColor={{ false: '#c5cfe0', true: '#bbdefb' }}
+                thumbColor={shift.enabled ? '#2962ff' : '#f4f4f4'}
               />
             </View>
           ))}
@@ -160,7 +160,7 @@ const SettingsScreen: React.FC<Props> = () => {
                   if (selectedDate) setDatePickerDate(selectedDate);
                 }}
                 textColor="#000000"
-                accentColor="#d81b60"
+                accentColor="#2962ff"
               />
               <View style={styles.modalButtons}>
                 <TouchableOpacity
@@ -202,12 +202,20 @@ const SettingsScreen: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f7fa',
   },
   header: {
     backgroundColor: '#fff',
     padding: 16,
-    marginBottom: 8,
+    marginBottom: 12,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   headerText: {
     fontSize: 20,
@@ -221,26 +229,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   dateButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: '#f0f4f8',
   },
   dateButtonText: {
     color: '#444',
     fontWeight: '500',
   },
   activeDateText: {
-    color: '#d81b60',
+    color: '#2962ff',
     fontWeight: 'bold',
   },
   customDateButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: '#f0f4f8',
   },
   customDateText: {
     marginLeft: 4,
@@ -258,14 +266,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
+    padding: 18,
+    borderRadius: 16,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   shiftInfo: {
     flex: 1,
@@ -273,47 +281,47 @@ const styles = StyleSheet.create({
   shiftTime: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
     color: '#191919',
   },
   shiftStatus: {
     fontSize: 14,
-    color: '#388e3c',
+    color: '#2e7d32',
     fontWeight: '500',
   },
   disabledStatus: {
-    color: '#d32f2f',
+    color: '#c62828',
     fontWeight: '500',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: 20,
   },
   modalButton: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 12,
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: 6,
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0f4f8',
   },
   confirmButton: {
-    backgroundColor: '#d81b60',
+    backgroundColor: '#2962ff',
   },
   modalButtonText: {
     fontWeight: 'bold',

@@ -12,7 +12,7 @@ export const initializeShiftsForDate = async (date: string): Promise<void> => {
     const shiftsRef = ref(database, `shifts/${date}`);
     const defaultShifts: Shift[] = allTimes.map((time: string) => {
         const enabled = (time === "19:00" || time === "20:00" || time === "21:30");
-        return { time, enabled, maxReservations: 15 };
+        return { time, enabled, maxReservations: 100 };
     });
     for (const shift of defaultShifts) {
         await set(ref(database, `shifts/${date}/${shift.time}`), shift);
