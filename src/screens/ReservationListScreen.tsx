@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { format,  addDays } from 'date-fns';
-import { Card, Text, Button, Colors } from 'react-native-ui-lib';
+import { View, FlatList, StyleSheet, TouchableOpacity, Text, Alert, Modal, Button, Platform } from 'react-native';
+import { format, addDays } from 'date-fns';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Reservation } from '../types';
 import { subscribeToReservations, deleteReservation, acceptReservation, rejectReservation } from '../services/ReservationService';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,6 +13,8 @@ const ReservationListScreen: React.FC<Props> = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [datePickerDate, setDatePickerDate] = useState(new Date());
+  const [showAndroidDatePicker, setShowAndroidDatePicker] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToReservations((newReservations) => {
@@ -31,16 +31,10 @@ const ReservationListScreen: React.FC<Props> = () => {
     try {
       if (reservation.id) {
         await deleteReservation(reservation.id);
-        Toast.show({
-          type: 'success',
-          text1: 'Prenotazione eliminata con successo',
-        });
+        showToast('success', 'Prenotazione eliminata con successo');
       }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Errore durante l\'eliminazione',
-      });
+      showToast('error', 'Errore durante l\'eliminazione');
     }
   };
 
@@ -48,16 +42,10 @@ const ReservationListScreen: React.FC<Props> = () => {
     try {
       if (reservation.id) {
         await acceptReservation(reservation.id, reservation);
-        Toast.show({
-          type: 'success',
-          text1: 'Prenotazione accettata',
-        });
+        showToast('success', 'Prenotazione accettata con successo');
       }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Errore durante l\'accettazione',
-      });
+      showToast('error', 'Errore durante l\'accettazione');
     }
   };
 
@@ -65,104 +53,85 @@ const ReservationListScreen: React.FC<Props> = () => {
     try {
       if (reservation.id) {
         await rejectReservation(reservation.id, reservation);
-        Toast.show({
-          type: 'success',
-          text1: 'Prenotazione rifiutata',
-        });
+        showToast('success', 'Prenotazione rifiutata con successo');
       }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Errore durante il rifiuto',
-      });
+      showToast('error', 'Errore durante il rifiuto');
     }
   };
 
+  // Funzione per mostrare un semplice toast utilizzando Alert
+  const showToast = (type: 'success' | 'error', message: string) => {
+    Alert.alert(
+      type === 'success' ? 'Operazione completata' : 'Errore',
+      message,
+      [{ text: 'OK' }],
+      { cancelable: true }
+    );
+  };
+
   const renderReservation = ({ item: reservation }: { item: Reservation }) => (
-    <Card style={styles.card} elevation={2}>
+    <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <View>
-          <Text text60 style={styles.name}>{reservation.fullName}</Text>
-          <Text text80 style={styles.contact}>{reservation.phone}</Text>
-          <Text text80 style={styles.contact}>{reservation.email}</Text>
-        </View>
-        <View style={styles.statusContainer}>
-          <Text
-            style={[
-              styles.status,
-              {
-                backgroundColor:
-                  reservation.status === 'accepted' ? Colors.green30 :
-                  reservation.status === 'rejected' ? Colors.red30 :
-                  Colors.yellow30
-              }
-            ]}
-          >
-            {reservation.status === 'accepted' ? 'Accettata' :
-             reservation.status === 'rejected' ? 'Rifiutata' :
-             'In attesa'}
-          </Text>
-        </View>
+        <Text style={styles.cardTitle}>{reservation.fullName}</Text>
+        <Text style={styles.cardSubtitle}>{reservation.time}</Text>
       </View>
-
-      <View style={styles.detailsContainer}>
-        <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="calendar" size={20} color={Colors.grey40} />
-          <Text text80 style={styles.detailText}>
-          {format(new Date(reservation.date), 'EEEE dd MMMM yyyy', { locale: it })}
-          </Text>
-        </View>
-        <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.grey40} />
-          <Text text80 style={styles.detailText}>{reservation.time}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <MaterialCommunityIcons name="account-group" size={20} color={Colors.grey40} />
-          <Text text80 style={styles.detailText}>
-            {reservation.seats} {reservation.seats === 1 ? 'persona' : 'persone'}
-          </Text>
-        </View>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardInfo}>Telefono: {reservation.phone}</Text>
+        <Text style={styles.cardInfo}>Email: {reservation.email}</Text>
+        <Text style={styles.cardInfo}>Persone: {reservation.seats}</Text>
+        {reservation.specialRequests && (
+          <Text style={styles.cardInfo}>Note: {reservation.specialRequests}</Text>
+        )}
       </View>
-
-      {reservation.specialRequests && (
-        <View style={styles.notesContainer}>
-          <Text text80 style={styles.notesLabel}>Note speciali:</Text>
-          <Text text80 style={styles.notes}>{reservation.specialRequests}</Text>
-        </View>
-      )}
-
-      <View style={styles.buttonContainer}>
+      <View style={styles.cardStatus}>
+        <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(reservation.status) }]} />
+        <Text style={styles.statusText}>{getStatusText(reservation.status)}</Text>
+      </View>
+      <View style={styles.cardActions}>
         {reservation.status === 'pending' && (
           <>
-            <Button
-              label="Accetta"
-              size="small"
-              backgroundColor={Colors.green30}
-              onPress={() => handleAccept(reservation)}
-              style={styles.actionButton}
-            />
-            <Button
-              label="Rifiuta"
-              size="small"
-              backgroundColor={Colors.red30}
-              onPress={() => handleReject(reservation)}
-              style={styles.actionButton}
-            />
+            <TouchableOpacity style={[styles.actionButton, styles.acceptButton]} onPress={() => handleAccept(reservation)}>
+              <MaterialCommunityIcons name="check" size={18} color="#fff" />
+              <Text style={styles.actionButtonText}>Accetta</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionButton, styles.rejectButton]} onPress={() => handleReject(reservation)}>
+              <MaterialCommunityIcons name="close" size={18} color="#fff" />
+              <Text style={styles.actionButtonText}>Rifiuta</Text>
+            </TouchableOpacity>
           </>
         )}
-        <Button
-          label="Elimina"
-          size="small"
-          backgroundColor={Colors.red30}
-          onPress={() => handleDelete(reservation)}
-          style={styles.actionButton}
-        />
+        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={() => handleDelete(reservation)}>
+          <MaterialCommunityIcons name="delete" size={18} color="#fff" />
+          <Text style={styles.actionButtonText}>Elimina</Text>
+        </TouchableOpacity>
       </View>
-    </Card>
+    </View>
   );
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'accepted': return '#388e3c';
+      case 'rejected': return '#d32f2f';
+      default: return '#f57c00';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'accepted': return 'Confermata';
+      case 'rejected': return 'Rifiutata';
+      default: return 'In attesa';
+    }
+  };
+
   const showDatePicker = () => {
-    setDatePickerVisible(true);
+    setDatePickerDate(new Date(`${selectedDate}T00:00:00`));
+    if (Platform.OS === 'ios') {
+      setDatePickerVisible(true);
+    } else {
+      setShowAndroidDatePicker(true);
+    }
   };
 
   const hideDatePicker = () => {
@@ -172,63 +141,35 @@ const ReservationListScreen: React.FC<Props> = () => {
   const handleConfirm = (date: Date) => {
     setSelectedDate(format(date, 'yyyy-MM-dd'));
     hideDatePicker();
+    setShowAndroidDatePicker(false);
   };
 
-    const handleQuickDateSelect = (days: number) => {
-      const newDate = addDays(new Date(), days);
-      setSelectedDate(format(newDate, 'yyyy-MM-dd'));
-    };
+  const handleQuickDateSelect = (days: number) => {
+    const date = addDays(new Date(), days);
+    setSelectedDate(format(date, 'yyyy-MM-dd'));
+  };
 
   const ListHeader = () => (
-    <Card style={styles.header}>
-      <Text text60 style={styles.headerTitle}>Seleziona Data</Text>
-               <View style={styles.quickDates}>
-                  <Button
-                    label="Oggi"
-                    size="small"
-                    backgroundColor={Colors.blue30}
-                    onPress={() => handleQuickDateSelect(0)}
-                    style={styles.quickDateButton}
-                  />
-                  <Button
-                    label="Domani"
-                    size="small"
-                    backgroundColor={Colors.blue30}
-                    onPress={() => handleQuickDateSelect(1)}
-                    style={styles.quickDateButton}
-                  />
-                  <Button
-                    label="Dopodomani"
-                    size="small"
-                    backgroundColor={Colors.blue30}
-                    onPress={() => handleQuickDateSelect(2)}
-                    style={styles.quickDateButton}
-                  />
-                </View>
-      <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
-        <View style={styles.dateButtonContent}>
-          <MaterialCommunityIcons name="calendar" size={24} color={Colors.blue30} />
-          <Text text70 style={styles.dateButtonText}>
-            {format(new Date(selectedDate), 'dd/MM/yyyy',{ locale: it })} 
+    <View style={styles.header}>
+      <View style={styles.dateSelector}>
+        <TouchableOpacity style={styles.dateButton} onPress={() => handleQuickDateSelect(0)}>
+          <Text style={[styles.dateButtonText, selectedDate === format(new Date(), 'yyyy-MM-dd') && styles.activeDateText]}>
+            Oggi
           </Text>
-        </View>
-      </TouchableOpacity>
-
-      
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-        minimumDate={new Date()}
-        date={new Date(selectedDate)}
-        locale="it"
-        confirmTextIOS="Conferma"  
-        cancelTextIOS="Annulla"
-        isDarkModeEnabled={false}
-        themeVariant="light"
-      />
-    </Card>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.dateButton} onPress={() => handleQuickDateSelect(1)}>
+          <Text style={[styles.dateButtonText, selectedDate === format(addDays(new Date(), 1), 'yyyy-MM-dd') && styles.activeDateText]}>
+            Domani
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.customDateButton} onPress={showDatePicker}>
+          <MaterialCommunityIcons name="calendar" size={18} color="#e91e63" />
+          <Text style={styles.customDateText}>
+            {format(new Date(`${selectedDate}T00:00:00`), 'dd/MM/yyyy')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   return (
@@ -236,18 +177,69 @@ const ReservationListScreen: React.FC<Props> = () => {
       <FlatList
         data={reservations}
         renderItem={renderReservation}
-        keyExtractor={(item) => item.id || ''}
-        contentContainerStyle={styles.listContainer}
+        keyExtractor={(item) => item.id || `${item.fullName}-${item.time}`}
         ListHeaderComponent={ListHeader}
-        ListEmptyComponent={() => (
+        ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text text70 style={styles.emptyText}>
-              Non ci sono prenotazioni per questa data
-            </Text>
+            <MaterialCommunityIcons name="calendar-blank" size={64} color="#ccc" />
+            <Text style={styles.emptyText}>Nessuna prenotazione per questa data</Text>
           </View>
-        )}
+        }
+        contentContainerStyle={styles.listContent}
       />
-      <Toast />
+      
+      {/* iOS DatePicker Modal */}
+      {Platform.OS === 'ios' && isDatePickerVisible && (
+        <Modal
+          visible={isDatePickerVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <DateTimePicker
+                value={datePickerDate}
+                mode="date"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) setDatePickerDate(selectedDate);
+                }}
+                textColor="#000000"
+                accentColor="#d81b60"
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={hideDatePicker}
+                >
+                  <Text style={styles.modalButtonText}>Annulla</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={() => handleConfirm(datePickerDate)}
+                >
+                  <Text style={styles.modalButtonText}>Conferma</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+      
+      {/* Android DatePicker */}
+      {Platform.OS === 'android' && showAndroidDatePicker && (
+        <DateTimePicker
+          value={datePickerDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowAndroidDatePicker(false);
+            if (selectedDate) {
+              handleConfirm(selectedDate);
+            }
+          }}
+        />
+      )}
     </View>
   );
 };
@@ -255,112 +247,172 @@ const ReservationListScreen: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5F5',
   },
   header: {
+    backgroundColor: '#fff',
     padding: 16,
-    backgroundColor: 'white',
-    marginBottom: 16,
-    borderRadius: 8,
-    margin: 16,
+    marginBottom: 8,
   },
-  headerTitle: {
-    marginBottom: 12,
-    color: Colors.grey10,
-  },
-  dateButton: {
-    backgroundColor: Colors.grey80,
-    padding: 12,
-    borderRadius: 8,
-  },
-  dateButtonContent: {
+  dateSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+  },
+  dateButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    backgroundColor: '#f0f0f0',
   },
   dateButtonText: {
-    marginLeft: 8,
-    color: Colors.blue30,
-    fontSize: 16,
+    color: '#444',
+    fontWeight: '500',
   },
-  listContainer: {
-    paddingBottom: 16,
+  activeDateText: {
+    color: '#d81b60',
+    fontWeight: 'bold',
   },
-  emptyContainer: {
-    padding: 16,
+  customDateButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    backgroundColor: '#f0f0f0',
   },
-  emptyText: {
-    color: Colors.grey30,
+  customDateText: {
+    marginLeft: 4,
+    color: '#444',
+    fontWeight: '500',
+  },
+  listContent: {
+    paddingBottom: 16,
+    flexGrow: 1,
   },
   card: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
     padding: 16,
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  name: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  contact: {
-    color: Colors.grey40,
-  },
-  statusContainer: {
-    alignItems: 'flex-end',
-  },
-  status: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    overflow: 'hidden',
-    color: 'white',
-  },
-  detailsContainer: {
-    marginBottom: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  detailText: {
-    marginLeft: 8,
-    color: Colors.grey20,
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#191919',
   },
-  quickDates: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  cardSubtitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#d81b60',
   },
-  quickDateButton: {
-    marginRight: 8,
-  },
-  notesContainer: {
-    backgroundColor: Colors.grey70,
-    padding: 12,
-    borderRadius: 8,
+  cardContent: {
     marginBottom: 12,
   },
-  notesLabel: {
-    fontWeight: 'bold',
+  cardInfo: {
+    fontSize: 14,
+    color: '#4d4d4d',
     marginBottom: 4,
   },
-  notes: {
-    color: Colors.grey20,
+  cardStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  buttonContainer: {
+  statusIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  cardActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 8,
   },
   actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
     marginLeft: 8,
+  },
+  actionButtonText: {
+    color: '#fff',
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  acceptButton: {
+    backgroundColor: '#388e3c',
+  },
+  rejectButton: {
+    backgroundColor: '#d32f2f',
+  },
+  deleteButton: {
+    backgroundColor: '#455a64',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  emptyText: {
+    marginTop: 8,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    padding: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  confirmButton: {
+    backgroundColor: '#d81b60',
+  },
+  modalButtonText: {
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 
