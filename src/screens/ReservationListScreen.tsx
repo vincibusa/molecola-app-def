@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { format } from 'date-fns';
+import { format,  addDays } from 'date-fns';
 import { Card, Text, Button, Colors } from 'react-native-ui-lib';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
@@ -174,10 +174,37 @@ const ReservationListScreen: React.FC<Props> = () => {
     hideDatePicker();
   };
 
+    const handleQuickDateSelect = (days: number) => {
+      const newDate = addDays(new Date(), days);
+      setSelectedDate(format(newDate, 'yyyy-MM-dd'));
+    };
+
   const ListHeader = () => (
     <Card style={styles.header}>
       <Text text60 style={styles.headerTitle}>Seleziona Data</Text>
-      
+               <View style={styles.quickDates}>
+                  <Button
+                    label="Oggi"
+                    size="small"
+                    backgroundColor={Colors.blue30}
+                    onPress={() => handleQuickDateSelect(0)}
+                    style={styles.quickDateButton}
+                  />
+                  <Button
+                    label="Domani"
+                    size="small"
+                    backgroundColor={Colors.blue30}
+                    onPress={() => handleQuickDateSelect(1)}
+                    style={styles.quickDateButton}
+                  />
+                  <Button
+                    label="Dopodomani"
+                    size="small"
+                    backgroundColor={Colors.blue30}
+                    onPress={() => handleQuickDateSelect(2)}
+                    style={styles.quickDateButton}
+                  />
+                </View>
       <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
         <View style={styles.dateButtonContent}>
           <MaterialCommunityIcons name="calendar" size={24} color={Colors.blue30} />
@@ -305,6 +332,14 @@ const styles = StyleSheet.create({
   detailText: {
     marginLeft: 8,
     color: Colors.grey20,
+  },
+  quickDates: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  quickDateButton: {
+    marginRight: 8,
   },
   notesContainer: {
     backgroundColor: Colors.grey70,
