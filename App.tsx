@@ -5,6 +5,7 @@ import { enableScreens } from 'react-native-screens';
 import AppNavigator from './src/navigation/AppNavigator';
 import { registerForPushNotificationsAsync } from './src/services/NotificationService';
 
+
 // Abilita react-native-screens
 enableScreens();
 

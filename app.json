@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/logo.png",
       "resizeMode": "contain",
@@ -44,6 +44,11 @@
           "color": "#e91e63"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0326aea9-1b91-4b8c-85ea-4f75f0e12911"
+      }
+    }
   }
 }
