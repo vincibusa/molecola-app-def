@@ -8,7 +8,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Reservation } from '../types';
 import { subscribeToReservations, deleteReservation, acceptReservation, rejectReservation } from '../services/ReservationService';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-
+import { it } from 'date-fns/locale';
 type Props = NativeStackScreenProps<any>;
 
 const ReservationListScreen: React.FC<Props> = () => {
@@ -109,7 +109,7 @@ const ReservationListScreen: React.FC<Props> = () => {
         <View style={styles.detailRow}>
           <MaterialCommunityIcons name="calendar" size={20} color={Colors.grey40} />
           <Text text80 style={styles.detailText}>
-            {format(new Date(reservation.date), 'dd/MM/yyyy')}
+          {format(new Date(reservation.date), 'EEEE dd MMMM yyyy', { locale: it })}
           </Text>
         </View>
         <View style={styles.detailRow}>
@@ -182,11 +182,12 @@ const ReservationListScreen: React.FC<Props> = () => {
         <View style={styles.dateButtonContent}>
           <MaterialCommunityIcons name="calendar" size={24} color={Colors.blue30} />
           <Text text70 style={styles.dateButtonText}>
-            {format(new Date(selectedDate), 'dd/MM/yyyy')}
+            {format(new Date(selectedDate), 'dd/MM/yyyy',{ locale: it })} 
           </Text>
         </View>
       </TouchableOpacity>
 
+      
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -194,6 +195,11 @@ const ReservationListScreen: React.FC<Props> = () => {
         onCancel={hideDatePicker}
         minimumDate={new Date()}
         date={new Date(selectedDate)}
+        locale="it"
+        confirmTextIOS="Conferma"  
+        cancelTextIOS="Annulla"
+        isDarkModeEnabled={false}
+        themeVariant="light"
       />
     </Card>
   );
