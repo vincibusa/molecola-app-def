@@ -1,17 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/database'; // Importa il modulo per il Realtime Database
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDVeHyE8kxoNxDyOZd14S2WU0PySB8J-gs",
-    authDomain: "fermento-vite.firebaseapp.com",
-    databaseURL: "https://fermento-vite-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "fermento-vite",
-    storageBucket: "fermento-vite.firebasestorage.app",
-    messagingSenderId: "448006545185",
-    appId: "1:448006545185:web:d3e95e010038f607dee860",
-    measurementId: "G-C7VMT1ES0N"
+  apiKey: "AIzaSyD6xAlpSbs--5sq48JDWVMZlee_gndU3Hg",
+  authDomain: "molecola-pizzeria.firebaseapp.com",
+  projectId: "molecola-pizzeria",
+  storageBucket: "molecola-pizzeria.appspot.com",
+  messagingSenderId: "720187459935",
+  appId: "1:720187459935:web:42f3a01d1fa5fb71deceea",
+  measurementId: "G-MP35B2FCHD",
+  databaseURL: "https://molecola-pizzeria-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 // Inizializza Firebase
-const app = initializeApp(firebaseConfig);
-export const database = getDatabase(app); 
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // Usa l'istanza esistente di Firebase
+}
+
+export const database = firebase.database(); // Esporta il database

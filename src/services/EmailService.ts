@@ -27,14 +27,14 @@ export const sendEmail = async (templateId: string, templateParams: EmailTemplat
         'Origin': 'http://localhost', // Necessario per l'API REST
       },
       body: JSON.stringify({
-        service_id: 'service_jlzz6px',
+        service_id: 'service_s8sb43q',
         template_id: templateId,
-        user_id: 'iIz1ynV6Pc7STPfuf',
+        user_id: 'XqLXNSgSPPdoMBU6i',
         template_params: {
           ...templateParams,
-          from_name: 'Fermento 2.0',
+          from_name: 'Molecola Pizzeria',
         },
-        accessToken: 'iIz1ynV6Pc7STPfuf', // Usa la chiave pubblica come accessToken
+        accessToken: 'XqLXNSgSPPdoMBU6i', // Usa la chiave pubblica come accessToken
       }),
     });
 
@@ -71,7 +71,7 @@ export const sendAcceptanceEmail = async (
     seats,
   };
   
-  return sendEmail('template_5ltxf0t', templateParams);
+  return sendEmail('template_wh2f9xb', templateParams);
 };
 
 /**
@@ -92,5 +92,5 @@ export const sendRejectionEmail = async (
     seats,
   };
   
-  return sendEmail('template_3cehio9', templateParams);
+  return sendEmail('template_10h8ulo', templateParams);
 }; 
