@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Fermento 2.0",
-    "slug": "fermento-app-def",
+    "name": "Molecola",
+    "slug": "molecola-app-def",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -14,16 +14,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fermento.app"
+      "bundleIdentifier": "com.molecola.app"
     },
     "notification": {
       "icon": "./assets/logo.png",
       "color": "#e91e63",
       "androidMode": "default",
-      "androidCollapsedTitle": "Fermento 2.0"
+      "androidCollapsedTitle": "Molecola"
     },
     "android": {
-      "package": "com.fermento.app",
+      "package": "com.molecola.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#FFFFFF"
@@ -43,7 +43,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "0326aea9-1b91-4b8c-85ea-4f75f0e12911"
+        "projectId": "d03f6062-b2f2-469c-b1b0-4043c1f1074b"
       }
     }
   }
